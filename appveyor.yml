@@ -1,0 +1,39 @@
+environment:
+  matrix:
+      - PYVERSION: "3.5.4"
+        PYEMBEDDED: ""
+      - PYVERSION: "3.6.7"
+        PYEMBEDDED: "python36"
+      - PYVERSION: "3.7.1"
+        PYEMBEDDED: "python37"
+
+init:
+  - "ECHO %PYVERSION%"
+
+install:
+  - "curl https://www.python.org/ftp/python/%PYVERSION%/python-%PYVERSION%-embed-amd64.zip --output pyembedded.zip"
+  - "7z e pyembedded.zip -r -o.\\pyembedded"
+  - "SET PYTHON=%cd%\\pyembedded"
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py"
+  - "python get-pip.py"
+  - "echo %PYEMBEDDED%"
+  - 'IF NOT "%PYEMBEDDED%"=="" (
+      echo Lib\site-packages >> %PYTHON%\\%PYEMBEDDED%._pth
+    )'
+  - "type %PYTHON%\\%PYEMBEDDED%._pth"
+  - "dir /B %PYTHON%\\Lib\\site-packages"
+  - "where pip"  
+  - "pip install jedi"
+
+  # Check that we have the expected version and architecture for Python
+  - "where python"
+  - "python --version"
+  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "where pip"
+  - "pip -V"
+  - "pip list"
+
+build: off
+
+test: off
